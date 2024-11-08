@@ -1,0 +1,44 @@
+name: CI Pipeline for Sample Application
+
+# Trigger the pipeline on push to the main branch or when a pull request is created.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # You can also use 'windows-latest' or 'macos-latest'
+
+    steps:
+      # Step 1: Checkout code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up the environment (e.g., .NET for C# apps)
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.0'  # Use your app's version (e.g., '6.0' for .NET 6)
+
+      # Step 3: Restore project dependencies (e.g., NuGet for .NET)
+      - name: Restore dependencies
+        run: dotnet restore
+
+      # Step 4: Build the application (compile the code)
+      - name: Build application
+        run: dotnet build --configuration Release
+
+      # Step 5: Run unit tests
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
+
+      # Step 6: Upload test results
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: test-results.trx
